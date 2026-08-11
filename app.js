@@ -146,9 +146,16 @@
     }
     try {
       $("#status").textContent = "正在读取 Google Sheet...";
-      const url = forceFresh ? `${APPS_SCRIPT_URL}?t=${Date.now()}` : APPS_SCRIPT_URL;
-      const response = await fetch(url, { cache: forceFresh ? "no-store" : "default" });
-      const result = await response.json();
+      const result = await new Promise((resolve, reject) => {
+        const callbackName = `personalExpensesCallback${Date.now()}`;
+        const script = document.createElement("script");
+        const timeout = window.setTimeout(() => { cleanup(); reject(new Error("Sheet timeout")); }, 15000);
+        function cleanup() { window.clearTimeout(timeout); delete window[callbackName]; script.remove(); }
+        window[callbackName] = (data) => { cleanup(); resolve(data); };
+        script.onerror = () => { cleanup(); reject(new Error("Sheet unavailable")); };
+        script.src = `${APPS_SCRIPT_URL}?callback=${callbackName}&t=${Date.now()}`;
+        document.head.appendChild(script);
+      });
       if (!response.ok || !Array.isArray(result.records)) throw new Error("Sheet not available");
       state.sheetRecords = result.records.map((row) => ({
         date: normalizeDate(row.date),

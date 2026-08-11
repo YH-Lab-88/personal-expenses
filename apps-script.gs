@@ -27,7 +27,7 @@ function getTopics() {
   return sheet.getDataRange().getValues().flat().map(String).map((value) => value.trim()).filter((value) => value && value !== 'Topic' && value !== '选项');
 }
 
-function doGet() {
+function doGet(e) {
   const sheet = getExpensesSheet();
   if (!sheet) throw new Error('Expenses sheet not found');
   const lastRow = getLastRecordRow(sheet);
@@ -38,7 +38,12 @@ function doGet() {
     others: values[2],
     cost: Number(values[3]) || 0,
   })).filter((record) => record.date && record.topic && record.cost >= 0).reverse() : [];
-  return ContentService.createTextOutput(JSON.stringify({ ok: true, records, topics: getTopics() })).setMimeType(ContentService.MimeType.JSON);
+  const payload = JSON.stringify({ ok: true, records, topics: getTopics() });
+  const callback = e && e.parameter && e.parameter.callback;
+  if (callback && /^[A-Za-z_$][\w$]*$/.test(callback)) {
+    return ContentService.createTextOutput(`${callback}(${payload})`).setMimeType(ContentService.MimeType.JAVASCRIPT);
+  }
+  return ContentService.createTextOutput(payload).setMimeType(ContentService.MimeType.JSON);
 }
 
 function doPost(e) {
