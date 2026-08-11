@@ -2,7 +2,7 @@
   const LOCAL_KEY = "personal-expenses-local-v2";
   const TOPICS_KEY = "personal-expenses-topics-v1";
   // Paste the deployed Google Apps Script Web App URL here.
-  const APPS_SCRIPT_URL = "";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTYucEDOqWB3tSc9Ax4RrNDQlLSxfg8ZSwS8ciH_a36aALs_tFql2c21QOJQKi7yA/exec";
   const defaultTopics = ["Food drinks", "Entertainment", "Fuel", "Parking", "Ultility"];
   const $ = (s) => document.querySelector(s);
   const today = new Date();

@@ -2,6 +2,11 @@ const SHEET_ID = '1Dcog-g4Epq5qprE3iHC7p_QFOYLKdbMC2Lh2fs3IFEo';
 const EXPENSES_SHEET_NAME = 'My Expenses';
 const OPTIONS_SHEET_NAME = '选项';
 
+function getExpensesSheet() {
+  const spreadsheet = SpreadsheetApp.openById(SHEET_ID);
+  return spreadsheet.getSheetByName(EXPENSES_SHEET_NAME) || spreadsheet.getSheets()[0];
+}
+
 function getLastRecordRow(sheet) {
   const values = sheet.getRange(1, 1, sheet.getMaxRows(), 4).getValues();
   for (let index = values.length - 1; index >= 1; index -= 1) {
@@ -23,8 +28,8 @@ function getTopics() {
 }
 
 function doGet() {
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(EXPENSES_SHEET_NAME);
-  if (!sheet) throw new Error(EXPENSES_SHEET_NAME + ' not found');
+  const sheet = getExpensesSheet();
+  if (!sheet) throw new Error('Expenses sheet not found');
   const lastRow = getLastRecordRow(sheet);
   const records = lastRow >= 2 ? sheet.getRange(2, 1, lastRow - 1, 4).getValues().map((values, index) => ({
     row: index + 2,
@@ -38,8 +43,8 @@ function doGet() {
 
 function doPost(e) {
   const data = JSON.parse(e.postData.contents || '{}');
-  const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName(EXPENSES_SHEET_NAME);
-  if (!sheet) throw new Error(EXPENSES_SHEET_NAME + ' not found');
+  const sheet = getExpensesSheet();
+  if (!sheet) throw new Error('Expenses sheet not found');
   const lastRow = getLastRecordRow(sheet);
   if (data.action === 'delete') {
     const row = Number(data.row);
