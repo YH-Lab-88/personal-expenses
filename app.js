@@ -6,7 +6,7 @@
   const defaultTopics = ["Food drinks", "Entertainment", "Fuel", "Parking", "Ultility"];
   const $ = (s) => document.querySelector(s);
   const today = new Date();
-  const iso = (d) => d.toISOString().slice(0, 10);
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const state = {
     sheetRecords: [],
     localRecords: read(LOCAL_KEY, []),
