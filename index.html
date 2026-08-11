@@ -32,6 +32,7 @@
       .month-analysis{padding:14px 0;border-bottom:1px solid var(--line)}.month-analysis:last-child{border-bottom:0}.month-analysis-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:var(--ink)}
       .refresh-button{padding:7px 10px;border:1px solid #c9dcf2;border-radius:9px;color:#2868ae;background:#fff;font-size:.74rem;font-weight:800;cursor:pointer}.refresh-button:disabled{opacity:.55;cursor:wait}
       .record-actions{display:flex;align-items:flex-end;flex-direction:column;gap:7px}.delete-record{padding:4px 8px;border:0;border-radius:8px;color:#bd4d4d;background:#fdecec;font-size:.72rem;font-weight:850;cursor:pointer}
+      .lucky-cat{display:grid;place-items:center;width:72px;height:72px}.lucky-cat svg{width:72px;height:72px;overflow:visible}.cat-paw{transform-origin:355px 145px;animation:cat-wave 1.2s ease-in-out infinite alternate}@keyframes cat-wave{from{transform:rotate(-12deg)}to{transform:rotate(16deg)}}
       .record{display:grid;grid-template-columns:48px minmax(72px,1fr) minmax(58px,1fr) 72px 44px;align-items:center;gap:7px;padding:11px 0;font-size:.74rem}.record-date,.record-topic,.record-others,.record .amount{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.record-date,.record-others{color:var(--muted)}.record-topic{font-weight:750;color:var(--ink)}.record .amount{font-size:.74rem;font-weight:850}.record .delete-record{padding:5px 6px;font-size:.68rem}
       @media(max-width:390px){.record{grid-template-columns:43px minmax(62px,1fr) minmax(48px,1fr) 66px 40px;gap:5px}.record .amount{font-size:.7rem}.record .delete-record{padding:5px 4px;font-size:.64rem}}
     </style>
@@ -40,13 +41,13 @@
     <main class="app-shell">
       <header class="topbar">
         <div><p class="eyebrow">PERSONAL SPENDING</p><h1>个人花费</h1><p class="muted">只记录你自己的日常开销</p></div>
-        <div class="top-actions"><div class="view-switch"><button id="recordButton" class="view-button active" type="button">记录花费</button><button id="analysisButton" class="view-button" type="button">每月分析</button></div><div class="month-chip"><span id="monthLabel"></span><strong id="monthTotal">RM 0.00</strong></div><button id="refreshButton" class="refresh-button" type="button">↻ 刷新资料</button></div>
+        <div class="top-actions"><div class="view-switch"><button id="recordButton" class="view-button active" type="button">记录花费</button><button id="analysisButton" class="view-button" type="button">每月分析</button></div><button id="refreshButton" class="refresh-button" type="button">↻ 刷新资料</button></div>
       </header>
 
       <div id="recordView">
       <section class="hero-card">
         <div><span class="label">本月总花费</span><strong id="heroTotal">RM 0.00</strong></div>
-        <div class="hero-mark">$</div>
+        <div class="lucky-cat" aria-label="动态招财猫"><svg viewBox="0 0 420 420" role="img" aria-hidden="true"><circle cx="210" cy="210" r="128" fill="#bfe3ff" opacity=".2"/><path d="M112 160 116 75l64 46c19-8 41-12 62-12s43 4 62 12l64-46-4 85c18 26 27 57 27 91 0 83-67 140-149 140S93 334 93 251c0-34 7-65 19-91Z" fill="#ffd766" stroke="#fff" stroke-width="8"/><path d="M115 78 178 121 120 143Z" fill="#ffb84d"/><path d="m305 78-63 43 58 22Z" fill="#ffb84d"/><circle cx="165" cy="219" r="10" fill="#123c70"/><circle cx="255" cy="219" r="10" fill="#123c70"/><path d="M190 270q20 18 40 0" fill="none" stroke="#123c70" stroke-width="8" stroke-linecap="round"/><path d="M154 286q56 46 112 0" fill="#e94d64" stroke="#fff" stroke-width="7"/><g class="cat-paw"><path d="M333 178q48-18 50 29t-34 64q-27 8-39-13t23-80Z" fill="#ffd766" stroke="#fff" stroke-width="8"/><path d="M357 190v49" stroke="#123c70" stroke-width="7" stroke-linecap="round"/></g><path d="M88 286q-43 10-57 48" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/></svg></div>
       </section>
 
       <section class="card">
