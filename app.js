@@ -17,7 +17,6 @@
 
   $("#date").value = displayDate(today);
   datePicker.value = iso(today);
-  $("#monthLabel").textContent = today.toLocaleDateString("en-MY", { month: "short", year: "numeric" });
 
   function read(key, fallback) {
     try {
