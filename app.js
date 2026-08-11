@@ -13,8 +13,10 @@
     localRecords: read(LOCAL_KEY, []),
     topics: read(TOPICS_KEY, defaultTopics),
   };
+  const datePicker = $("#datePicker");
 
   $("#date").value = displayDate(today);
+  datePicker.value = iso(today);
   $("#monthLabel").textContent = today.toLocaleDateString("en-MY", { month: "short", year: "numeric" });
 
   function read(key, fallback) {
@@ -200,6 +202,7 @@
       }
       e.target.reset();
       $("#date").value = displayDate(new Date());
+      datePicker.value = iso(new Date());
       $("#status").textContent = APPS_SCRIPT_URL ? "已保存到 Google Sheet。" : "已记录在本机模拟。";
       $("#status").className = "status success";
     } catch {
@@ -237,6 +240,16 @@
   });
 
   $("#date").addEventListener("change", render);
+  $("#date").addEventListener("click", () => {
+    if (typeof datePicker.showPicker === "function") datePicker.showPicker();
+    else datePicker.click();
+  });
+  datePicker.addEventListener("change", () => {
+    if (!datePicker.value) return;
+    const [year, month, day] = datePicker.value.split("-").map(Number);
+    $("#date").value = displayDate(new Date(year, month - 1, day));
+    render();
+  });
   $("#refreshButton").addEventListener("click", async () => {
     const button = $("#refreshButton");
     button.disabled = true;
