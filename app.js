@@ -229,6 +229,14 @@
   });
 
   $("#date").addEventListener("change", render);
+  $("#refreshButton").addEventListener("click", async () => {
+    const button = $("#refreshButton");
+    button.disabled = true;
+    button.textContent = "↻ 更新中...";
+    await loadSheetRecords();
+    button.disabled = false;
+    button.textContent = "↻ 刷新资料";
+  });
   const recordView = $("#recordView");
   const analysisView = $("#analysisView");
   function switchView(view) {

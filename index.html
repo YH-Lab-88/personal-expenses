@@ -18,6 +18,7 @@
       .top-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
       .view-switch{display:flex;gap:5px;padding:4px;border-radius:12px;background:#eaf3fd}.view-button{padding:7px 9px;border:0;border-radius:8px;color:#2868ae;background:transparent;font-size:.74rem;font-weight:800;cursor:pointer}.view-button.active{color:#fff;background:#2d74c8}.analysis-view{min-height:220px}
       .month-analysis{padding:14px 0;border-bottom:1px solid var(--line)}.month-analysis:last-child{border-bottom:0}.month-analysis-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:var(--ink)}
+      .refresh-button{padding:7px 10px;border:1px solid #c9dcf2;border-radius:9px;color:#2868ae;background:#fff;font-size:.74rem;font-weight:800;cursor:pointer}.refresh-button:disabled{opacity:.55;cursor:wait}
       .record-actions{display:flex;align-items:flex-end;flex-direction:column;gap:7px}.delete-record{padding:4px 8px;border:0;border-radius:8px;color:#bd4d4d;background:#fdecec;font-size:.72rem;font-weight:850;cursor:pointer}
     </style>
   </head>
@@ -25,7 +26,7 @@
     <main class="app-shell">
       <header class="topbar">
         <div><p class="eyebrow">PERSONAL SPENDING</p><h1>个人花费</h1><p class="muted">只记录你自己的日常开销</p></div>
-        <div class="top-actions"><div class="view-switch"><button id="recordButton" class="view-button active" type="button">记录花费</button><button id="analysisButton" class="view-button" type="button">每月分析</button></div><div class="month-chip"><span id="monthLabel"></span><strong id="monthTotal">RM 0.00</strong></div></div>
+        <div class="top-actions"><div class="view-switch"><button id="recordButton" class="view-button active" type="button">记录花费</button><button id="analysisButton" class="view-button" type="button">每月分析</button></div><div class="month-chip"><span id="monthLabel"></span><strong id="monthTotal">RM 0.00</strong></div><button id="refreshButton" class="refresh-button" type="button">↻ 刷新资料</button></div>
       </header>
 
       <div id="recordView">
