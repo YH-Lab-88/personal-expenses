@@ -128,9 +128,9 @@
       }).join("")
       : `<p class="empty">Google Sheet 还没有可分析的记录。</p>`;
 
-    const rows = [...records].sort((a, b) => b.date.localeCompare(a.date));
+    const rows = [...records].filter((row) => row.date.startsWith(month)).sort((a, b) => b.date.localeCompare(a.date));
     $("#records").innerHTML = rows.length
-      ? rows.slice(0, 20).map((r) => `<div class="record"><div><strong>${esc(r.topic)}</strong><small>${esc(r.date)}${r.others ? ` · ${esc(r.others)}` : ""}</small></div><div class="record-actions"><span class="amount">${money(r.cost)}</span><button class="delete-record" data-source="${esc(r.source)}" data-id="${esc(r.id)}" type="button" aria-label="删除这笔记录">删除</button></div></div>`).join("")
+      ? rows.map((r) => `<div class="record"><div><strong>${esc(r.topic)}</strong><small>${esc(r.date)}${r.others ? ` · ${esc(r.others)}` : ""}</small></div><div class="record-actions"><span class="amount">${money(r.cost)}</span><button class="delete-record" data-source="${esc(r.source)}" data-id="${esc(r.id)}" type="button" aria-label="删除这笔记录">删除</button></div></div>`).join("")
       : `<p class="empty">Google Sheet 还没有记录。</p>`;
   }
 
