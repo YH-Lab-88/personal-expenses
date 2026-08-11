@@ -12,7 +12,7 @@
       :root{--ink:#123c70;--muted:#6c7f96;--line:#d9e5f2;--bg:#f3f7fc;--accent:#2d74c8;--soft:#eaf3fd;--shadow:0 14px 35px rgba(18,60,112,.1)}
       .hero-card{background:linear-gradient(135deg,#123c70,#2d74c8)}
       .month-chip{border-color:#c9dcf2;background:#f8fbff}
-      .local-badge{color:#2868ae}
+      .local-badge{color:#2868ae;text-decoration:none}
       input,select{background:#fbfdff}
       input[type=date]{height:50px;min-height:50px;padding:0 13px;appearance:none;-webkit-appearance:none;color:#234d7e;font-weight:700;color-scheme:light}
       #date{height:50px;text-align:left;font-weight:700;letter-spacing:.02em;flex:1}
@@ -50,7 +50,7 @@
       </section>
 
       <section class="card">
-        <div class="section-head"><h2>新增花费</h2><span class="local-badge">Google Sheet</span></div>
+        <div class="section-head"><h2>新增花费</h2><a class="local-badge" href="https://docs.google.com/spreadsheets/d/1Dcog-g4Epq5qprE3iHC7p_QFOYLKdbMC2Lh2fs3IFEo/edit?gid=0#gid=0" target="_blank" rel="noopener">Google Sheet</a></div>
         <form id="expenseForm">
           <div class="field-row"><label for="date">日期</label><div class="date-control"><input id="date" type="text" inputmode="numeric" placeholder="11/08/2026" maxlength="10" required /><button id="calendarButton" class="calendar-button" type="button" aria-label="选择日期">▣</button></div><input id="datePicker" type="date" tabindex="-1" aria-hidden="true" /></div>
           <div class="field-row"><label for="topic">课题</label><select id="topic" required></select></div>
