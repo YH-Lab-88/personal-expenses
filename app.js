@@ -130,7 +130,7 @@
 
     const rows = [...records].filter((row) => row.date.startsWith(month)).sort((a, b) => b.date.localeCompare(a.date));
     $("#records").innerHTML = rows.length
-      ? rows.map((r) => `<div class="record"><span class="record-date">${esc(r.date.slice(8, 10))}-${esc(r.date.slice(5, 7))}</span><span class="record-topic">${esc(r.topic)}</span><span class="record-others">${esc(r.others || "—")}</span><span class="amount">${money(r.cost)}</span><button class="delete-record" data-source="${esc(r.source)}" data-id="${esc(r.id)}" type="button" aria-label="删除这笔记录">删除</button></div>`).join("")
+      ? rows.map((r) => `<div class="record"><span class="record-date">${esc(r.date.slice(8, 10))}-${esc(r.date.slice(5, 7))}</span><span class="record-topic">${esc(r.topic)}</span><span class="record-others">${esc(r.others || "—")}</span><span class="amount">${Number(r.cost || 0).toFixed(2)}</span><button class="delete-record" data-source="${esc(r.source)}" data-id="${esc(r.id)}" type="button" aria-label="删除这笔记录">删除</button></div>`).join("")
       : `<p class="empty">Google Sheet 还没有记录。</p>`;
   }
 
