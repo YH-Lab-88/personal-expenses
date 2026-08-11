@@ -1,9 +1,8 @@
 (() => {
   const LOCAL_KEY = "personal-expenses-local-v2";
-  const HIDDEN_KEY = "personal-expenses-hidden-sheet-v1";
   const TOPICS_KEY = "personal-expenses-topics-v1";
-  const SHEET_ID = "1Dcog-g4Epq5qprE3iHC7p_QFOYLKdbMC2Lh2fs3IFEo";
-  const SHEET_CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=0`;
+  // Paste the deployed Google Apps Script Web App URL here.
+  const APPS_SCRIPT_URL = "";
   const defaultTopics = ["Food drinks", "Entertainment", "Fuel", "Parking", "Ultility"];
   const $ = (s) => document.querySelector(s);
   const today = new Date();
@@ -11,7 +10,6 @@
   const state = {
     sheetRecords: [],
     localRecords: read(LOCAL_KEY, []),
-    hiddenSheetRecords: read(HIDDEN_KEY, []),
     topics: read(TOPICS_KEY, defaultTopics),
   };
 
@@ -28,7 +26,6 @@
 
   function save() {
     localStorage.setItem(LOCAL_KEY, JSON.stringify(state.localRecords));
-    localStorage.setItem(HIDDEN_KEY, JSON.stringify(state.hiddenSheetRecords));
     localStorage.setItem(TOPICS_KEY, JSON.stringify(state.topics));
   }
 
@@ -91,13 +88,7 @@
     return [row.date, row.topic, row.others, Number(row.cost).toFixed(2)].join("|");
   }
 
-  function allRecords() {
-    const hidden = new Set(state.hiddenSheetRecords);
-    return [
-      ...state.sheetRecords.filter((row) => !hidden.has(row.id)),
-      ...state.localRecords,
-    ];
-  }
+  function allRecords() { return [...state.sheetRecords, ...state.localRecords]; }
 
   function renderTopics() {
     const topics = Array.from(new Set([...state.topics, ...allRecords().map((row) => row.topic).filter(Boolean)]));
@@ -131,23 +122,31 @@
   }
 
   async function loadSheetRecords() {
-    $("#status").textContent = "正在读取 Google Sheet...";
+    if (!APPS_SCRIPT_URL) {
+      $("#status").textContent = "尚未连接 Google Sheet，请先完成 Apps Script 部署。";
+      $("#status").className = "status error";
+      renderTopics();
+      render();
+      return;
+    }
     try {
-      const response = await fetch(SHEET_CSV_URL, { cache: "no-store" });
-      if (!response.ok) throw new Error("Sheet not available");
-      const rows = parseCsv(await response.text()).slice(1);
-      state.sheetRecords = rows.map((row) => {
-        const hasOthers = row.length >= 4;
-        const record = {
-          date: normalizeDate(row[0]),
-          topic: String(row[1] || "").trim(),
-          others: hasOthers ? String(row[2] || "").trim() : "",
-          cost: Number(String(hasOthers ? row[3] : row[2]).replace(/[^\d.-]/g, "")),
-          source: "sheet",
-        };
-        record.id = rowId(record);
-        return record;
-      }).filter((row) => row.date && row.topic && Number.isFinite(row.cost));
+      $("#status").textContent = "正在读取 Google Sheet...";
+      const response = await fetch(`${APPS_SCRIPT_URL}?t=${Date.now()}`, { cache: "no-store" });
+      const result = await response.json();
+      if (!response.ok || !Array.isArray(result.records)) throw new Error("Sheet not available");
+      state.sheetRecords = result.records.map((row) => ({
+        date: normalizeDate(row.date),
+        topic: String(row.topic || "").trim(),
+        others: String(row.others || "").trim(),
+        cost: Number(row.cost),
+        row: Number(row.row),
+        source: "sheet",
+        id: String(row.row),
+      })).filter((row) => row.date && row.topic && Number.isFinite(row.cost));
+      if (Array.isArray(result.topics) && result.topics.length) {
+        state.topics = Array.from(new Set(result.topics.map((topic) => String(topic).trim()).filter(Boolean)));
+        save();
+      }
       $("#status").textContent = "已读取 Google Sheet。";
       $("#status").className = "status success";
     } catch {
@@ -158,7 +157,7 @@
     render();
   }
 
-  $("#expenseForm").addEventListener("submit", (e) => {
+  $("#expenseForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const date = $("#date").value;
     const topic = $("#topic").value;
@@ -169,25 +168,50 @@
       $("#status").className = "status error";
       return;
     }
-    const record = { date, topic, others, cost, source: "local" };
-    record.id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-    state.localRecords.push(record);
-    save();
-    e.target.reset();
-    $("#date").value = iso(new Date());
-    $("#status").textContent = "已记录在本机模拟。";
-    $("#status").className = "status success";
-    renderTopics();
-    render();
+    try {
+      $("#status").textContent = APPS_SCRIPT_URL ? "正在保存到 Google Sheet..." : "已记录在本机模拟。";
+      if (APPS_SCRIPT_URL) {
+        const response = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify({ date, topic, others, cost }) });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error("save failed");
+        await loadSheetRecords();
+      } else {
+        const record = { date, topic, others, cost, source: "local" };
+        record.id = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+        state.localRecords.push(record);
+        save();
+        renderTopics();
+        render();
+      }
+      e.target.reset();
+      $("#date").value = iso(new Date());
+      $("#status").textContent = APPS_SCRIPT_URL ? "已保存到 Google Sheet。" : "已记录在本机模拟。";
+      $("#status").className = "status success";
+    } catch {
+      $("#status").textContent = "保存失败，请检查 Google Apps Script 连接。";
+      $("#status").className = "status error";
+    }
   });
 
-  $("#records").addEventListener("click", (event) => {
+  $("#records").addEventListener("click", async (event) => {
     const button = event.target.closest(".delete-record");
     if (!button) return;
     if (!confirm("删除这笔个人花费记录？")) return;
-    if (button.dataset.source === "sheet") {
-      state.hiddenSheetRecords.push(button.dataset.id);
-      $("#status").textContent = "已从 APP 画面移除。Google Sheet 原资料不会被改动。";
+    if (button.dataset.source === "sheet" && APPS_SCRIPT_URL) {
+      button.disabled = true;
+      $("#status").textContent = "正在从 Google Sheet 删除...";
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify({ action: "delete", row: Number(button.dataset.id) }) });
+        const result = await response.json();
+        if (!response.ok || !result.ok) throw new Error("delete failed");
+        await loadSheetRecords();
+        $("#status").textContent = "记录已从 Google Sheet 删除。";
+      } catch {
+        button.disabled = false;
+        $("#status").textContent = "删除失败，请检查 Google Apps Script 连接。";
+        $("#status").className = "status error";
+      }
+      return;
     } else {
       state.localRecords = state.localRecords.filter((row) => row.id !== button.dataset.id);
       $("#status").textContent = "已删除本机记录。";
@@ -201,7 +225,6 @@
   $("#reset").addEventListener("click", () => {
     if (confirm("清除本机新增和隐藏记录？")) {
       state.localRecords = [];
-      state.hiddenSheetRecords = [];
       save();
       render();
       loadSheetRecords();
