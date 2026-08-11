@@ -30,7 +30,7 @@
   }
 
   function money(n) {
-    return `RM ${Number(n || 0).toFixed(2)}`;
+    return Number(n || 0).toFixed(2);
   }
 
   function esc(v) {
