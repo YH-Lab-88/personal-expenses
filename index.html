@@ -17,6 +17,7 @@
       .bar-track{background:#e9f0f8}
       .top-actions{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
       .view-switch{display:flex;gap:5px;padding:4px;border-radius:12px;background:#eaf3fd}.view-button{padding:7px 9px;border:0;border-radius:8px;color:#2868ae;background:transparent;font-size:.74rem;font-weight:800;cursor:pointer}.view-button.active{color:#fff;background:#2d74c8}.analysis-view{min-height:220px}
+      .month-analysis{padding:14px 0;border-bottom:1px solid var(--line)}.month-analysis:last-child{border-bottom:0}.month-analysis-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:var(--ink)}
       .record-actions{display:flex;align-items:flex-end;flex-direction:column;gap:7px}.delete-record{padding:4px 8px;border:0;border-radius:8px;color:#bd4d4d;background:#fdecec;font-size:.72rem;font-weight:850;cursor:pointer}
     </style>
   </head>
@@ -47,7 +48,7 @@
 
       <section class="card"><div class="section-head"><h2>最近记录</h2><span id="recordCount" class="muted"></span></div><div id="records" class="records"></div></section>
       </div>
-      <section id="analysisView" class="card analysis-view" hidden><div class="section-head"><h2>每月分析</h2><button id="reset" class="text-button">清除本机资料</button></div><div id="monthlyChart" class="chart"></div></section>
+      <section id="analysisView" class="card analysis-view" hidden><div class="section-head"><h2>每月分析</h2><span class="muted">按 Topic 分类</span></div><div id="monthlyChart" class="chart"></div></section>
     </main>
     <script src="./app.js"></script>
   </body>

@@ -107,12 +107,19 @@
     const monthly = {};
     records.forEach((row) => {
       const rowMonth = row.date.slice(0, 7);
-      if (rowMonth) monthly[rowMonth] = (monthly[rowMonth] || 0) + Number(row.cost);
+      if (!rowMonth) return;
+      if (!monthly[rowMonth]) monthly[rowMonth] = {};
+      monthly[rowMonth][row.topic] = (monthly[rowMonth][row.topic] || 0) + Number(row.cost);
     });
-    const entries = Object.entries(monthly).sort((a, b) => b[0].localeCompare(a[0])).slice(0, 6);
-    const max = Math.max(...entries.map((entry) => entry[1]), 1);
-    $("#monthlyChart").innerHTML = entries.length
-      ? entries.map(([m, v]) => `<div class="bar-row"><span>${m}</span><div class="bar-track"><div class="bar-fill" style="width:${(v / max) * 100}%"></div></div><span class="bar-value">${money(v)}</span></div>`).join("")
+    const months = Object.keys(monthly).sort((a, b) => b.localeCompare(a)).slice(0, 12);
+    const categories = Array.from(new Set(state.topics.filter(Boolean)));
+    $("#monthlyChart").innerHTML = months.length
+      ? months.map((month) => {
+        const byTopic = monthly[month];
+        const total = Object.values(byTopic).reduce((sum, value) => sum + value, 0);
+        const rowsHtml = categories.map((topic) => `<div class="bar-row"><span>${esc(topic)}</span><div class="bar-track"><div class="bar-fill" style="width:${total ? ((byTopic[topic] || 0) / total) * 100 : 0}%"></div></div><span class="bar-value">${money(byTopic[topic] || 0)}</span></div>`).join("");
+        return `<div class="month-analysis"><div class="month-analysis-head"><strong>${esc(month)}</strong><span>${money(total)}</span></div>${rowsHtml}</div>`;
+      }).join("")
       : `<p class="empty">Google Sheet 还没有可分析的记录。</p>`;
 
     const rows = [...records].sort((a, b) => b.date.localeCompare(a.date));
@@ -222,15 +229,6 @@
   });
 
   $("#date").addEventListener("change", render);
-  $("#reset").addEventListener("click", () => {
-    if (confirm("清除本机新增和隐藏记录？")) {
-      state.localRecords = [];
-      save();
-      render();
-      loadSheetRecords();
-    }
-  });
-
   const recordView = $("#recordView");
   const analysisView = $("#analysisView");
   function switchView(view) {
