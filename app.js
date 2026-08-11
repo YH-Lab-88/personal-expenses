@@ -240,10 +240,12 @@
   });
 
   $("#date").addEventListener("change", render);
-  $("#date").addEventListener("click", () => {
+  function openDatePicker() {
     if (typeof datePicker.showPicker === "function") datePicker.showPicker();
     else datePicker.click();
-  });
+  }
+  $("#date").addEventListener("click", openDatePicker);
+  $("#calendarButton").addEventListener("click", openDatePicker);
   datePicker.addEventListener("change", () => {
     if (!datePicker.value) return;
     const [year, month, day] = datePicker.value.split("-").map(Number);

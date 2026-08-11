@@ -15,8 +15,9 @@
       .local-badge{color:#2868ae}
       input,select{background:#fbfdff}
       input[type=date]{height:50px;min-height:50px;padding:0 13px;appearance:none;-webkit-appearance:none;color:#234d7e;font-weight:700;color-scheme:light}
-      #date{height:50px;text-align:center;font-weight:700;letter-spacing:.02em}
+      #date{height:50px;text-align:left;font-weight:700;letter-spacing:.02em;flex:1}
       .field-row{display:grid;grid-template-columns:42px 1fr;align-items:center;gap:10px;position:relative}.field-row>label{display:block;color:var(--muted);font-size:.8rem;font-weight:750}.field-row>input,.field-row>select{grid-column:2}.field-row>#datePicker{position:absolute;left:42px;width:1px;height:1px;opacity:0;pointer-events:none}
+      .date-control{grid-column:2;display:flex;align-items:center;gap:8px}.date-control #date{grid-column:auto}.calendar-button{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border:1px solid #c9dcf2;border-radius:10px;color:#2868ae;background:#eaf3fd;font-size:1.15rem;cursor:pointer}
       input[type=number]{text-align:right;font-variant-numeric:tabular-nums lining-nums}
       .month-chip strong,.hero-card strong,.bar-value,.record .amount,.month-analysis-head span{font-variant-numeric:tabular-nums lining-nums}
       .bar-value,.record .amount,.month-analysis-head span{white-space:nowrap;text-align:right}
@@ -50,7 +51,7 @@
       <section class="card">
         <div class="section-head"><h2>新增花费</h2><span class="local-badge">Google Sheet</span></div>
         <form id="expenseForm">
-          <div class="field-row"><label for="date">日期</label><input id="date" type="text" inputmode="numeric" placeholder="11/08/2026" maxlength="10" required /><input id="datePicker" type="date" tabindex="-1" aria-hidden="true" /></div>
+          <div class="field-row"><label for="date">日期</label><div class="date-control"><input id="date" type="text" inputmode="numeric" placeholder="11/08/2026" maxlength="10" required /><button id="calendarButton" class="calendar-button" type="button" aria-label="选择日期">▣</button></div><input id="datePicker" type="date" tabindex="-1" aria-hidden="true" /></div>
           <div class="field-row"><label for="topic">课题</label><select id="topic" required></select></div>
           <div class="field-row"><label for="others">额外</label><input id="others" type="text" placeholder="details" /></div>
           <div class="field-row"><label for="cost">金额</label><input id="cost" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required /></div>
