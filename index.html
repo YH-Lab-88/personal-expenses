@@ -16,9 +16,10 @@
       input,select{background:#fbfdff}
       input[type=date]{height:50px;min-height:50px;padding:0 13px;appearance:none;-webkit-appearance:none;color:#234d7e;font-weight:700;color-scheme:light}
       #date{height:50px;text-align:left;font-weight:700;letter-spacing:.02em;flex:1}
-      .field-row{display:grid;grid-template-columns:42px 1fr;align-items:center;gap:10px;position:relative}.field-row>label{display:block;color:var(--muted);font-size:.8rem;font-weight:750}.field-row>input,.field-row>select{grid-column:2}.field-row>#datePicker{position:absolute;left:42px;width:1px;height:1px;opacity:0;pointer-events:none}
+      .field-row{display:grid;grid-template-columns:42px 1fr;align-items:center;gap:10px;position:relative}.field-row>label{display:block;color:var(--muted);font-size:.8rem;font-weight:750}.field-row>input,.field-row>select{grid-column:2}.field-row>#datePicker{position:absolute;right:0;width:42px;height:42px;opacity:0;z-index:2;cursor:pointer}
       .date-control{grid-column:2;display:flex;align-items:center;gap:8px}.date-control #date{grid-column:auto}.calendar-button{display:grid;place-items:center;width:42px;height:42px;flex:0 0 42px;border:1px solid #c9dcf2;border-radius:10px;color:#2868ae;background:#eaf3fd;font-size:1.15rem;cursor:pointer}
       input[type=number]{text-align:right;font-variant-numeric:tabular-nums lining-nums}
+      #cost{text-align:left}
       .month-chip strong,.hero-card strong,.bar-value,.record .amount,.month-analysis-head span{font-variant-numeric:tabular-nums lining-nums}
       .bar-value,.record .amount,.month-analysis-head span{white-space:nowrap;text-align:right}
       input[type=number]{text-align:right;font-variant-numeric:tabular-nums}
