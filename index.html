@@ -15,6 +15,7 @@
       .local-badge{color:#2868ae}
       input,select{background:#fbfdff}
       input[type=date]{height:50px;min-height:50px;padding:0 13px;appearance:none;-webkit-appearance:none;color:#234d7e;font-weight:700;color-scheme:light}
+      #date{height:50px;text-align:center;font-weight:700;letter-spacing:.02em}
       input[type=number]{text-align:right;font-variant-numeric:tabular-nums lining-nums}
       .month-chip strong,.hero-card strong,.bar-value,.record .amount,.month-analysis-head span{font-variant-numeric:tabular-nums lining-nums}
       .bar-value,.record .amount,.month-analysis-head span{white-space:nowrap;text-align:right}
@@ -48,11 +49,11 @@
       <section class="card">
         <div class="section-head"><h2>新增花费</h2><span class="local-badge">Google Sheet</span></div>
         <form id="expenseForm">
-          <label>日期<input id="date" type="date" required /></label>
-          <label>Topic<select id="topic" required></select></label>
-          <label>Others（详情）<input id="others" type="text" placeholder="例如：哪一家餐厅、买了什么" /></label>
+          <label>日期<input id="date" type="text" inputmode="numeric" placeholder="11/08/2026" maxlength="10" required /></label>
+          <select id="topic" aria-label="Topic" required></select>
+          <input id="others" type="text" aria-label="details" placeholder="details" />
           <label>金额<input id="cost" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required /></label>
-          <button class="primary" type="submit">记录这笔花费</button>
+          <button class="primary" type="submit">记录</button>
           <p id="status" class="status" role="status"></p>
         </form>
       </section>

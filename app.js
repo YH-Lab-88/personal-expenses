@@ -7,13 +7,14 @@
   const $ = (s) => document.querySelector(s);
   const today = new Date();
   const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const displayDate = (d) => `${String(d.getDate()).padStart(2, "0")}/${String(d.getMonth() + 1).padStart(2, "0")}/${d.getFullYear()}`;
   const state = {
     sheetRecords: [],
     localRecords: read(LOCAL_KEY, []),
     topics: read(TOPICS_KEY, defaultTopics),
   };
 
-  $("#date").value = iso(today);
+  $("#date").value = displayDate(today);
   $("#monthLabel").textContent = today.toLocaleDateString("en-MY", { month: "short", year: "numeric" });
 
   function read(key, fallback) {
@@ -103,7 +104,7 @@
 
   function render() {
     const records = allRecords();
-    const month = $("#date").value.slice(0, 7) || iso(today).slice(0, 7);
+    const month = normalizeDate($("#date").value).slice(0, 7) || iso(today).slice(0, 7);
     const monthRows = records.filter((r) => r.date.startsWith(month));
     const total = monthRows.reduce((sum, row) => sum + Number(row.cost), 0);
     $("#monthTotal").textContent = money(total);
@@ -173,7 +174,7 @@
 
   $("#expenseForm").addEventListener("submit", async (e) => {
     e.preventDefault();
-    const date = $("#date").value;
+    const date = normalizeDate($("#date").value);
     const topic = $("#topic").value;
     const others = $("#others").value.trim();
     const cost = Number($("#cost").value);
@@ -198,7 +199,7 @@
         render();
       }
       e.target.reset();
-      $("#date").value = iso(new Date());
+      $("#date").value = displayDate(new Date());
       $("#status").textContent = APPS_SCRIPT_URL ? "已保存到 Google Sheet。" : "已记录在本机模拟。";
       $("#status").className = "status success";
     } catch {
