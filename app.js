@@ -108,7 +108,6 @@
     const month = normalizeDate($("#date").value).slice(0, 7) || iso(today).slice(0, 7);
     const monthRows = records.filter((r) => r.date.startsWith(month));
     const total = monthRows.reduce((sum, row) => sum + Number(row.cost), 0);
-    $("#monthTotal").textContent = money(total);
     $("#heroTotal").textContent = money(total);
     $("#recordCount").textContent = `${records.length} 笔`;
 
