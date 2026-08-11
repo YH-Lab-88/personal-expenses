@@ -69,11 +69,28 @@
       : "<p class=\"empty\">Google Sheet 还没有可分析的记录。</p>";
   }
 
-  function getSheetData() {
+  async function getSheetData() {
+    const controller = new AbortController();
+    const timeout = window.setTimeout(() => controller.abort(), 10000);
+    try {
+      const response = await fetch(`${APPS_SCRIPT_URL}?t=${Date.now()}`, {
+        cache: "no-store",
+        signal: controller.signal,
+      });
+      if (!response.ok) throw new Error("Google Sheet 无响应");
+      return await response.json();
+    } catch {
+      return getSheetDataJsonp();
+    } finally {
+      window.clearTimeout(timeout);
+    }
+  }
+
+  function getSheetDataJsonp() {
     return new Promise((resolve, reject) => {
       const callback = `personalExpenses${Date.now()}`;
       const script = document.createElement("script");
-      const timeout = window.setTimeout(fail, 20000);
+      const timeout = window.setTimeout(fail, 10000);
       function cleanup() { window.clearTimeout(timeout); delete window[callback]; script.remove(); }
       function fail() { cleanup(); reject(new Error("Google Sheet 无响应")); }
       window[callback] = (payload) => { cleanup(); resolve(payload); };
