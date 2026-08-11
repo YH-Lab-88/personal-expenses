@@ -76,12 +76,18 @@
 
   function normalizeDate(value) {
     const raw = String(value || "").trim();
-    const parsed = new Date(raw);
-    if (!Number.isNaN(parsed.getTime())) return iso(parsed);
+    const isoMatch = raw.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+    if (isoMatch) return `${isoMatch[1]}-${isoMatch[2].padStart(2, "0")}-${isoMatch[3].padStart(2, "0")}`;
     const match = raw.match(/^(\d{1,2})[/-](\d{1,2})[/-](\d{2,4})$/);
-    if (!match) return raw;
-    const year = match[3].length === 2 ? `20${match[3]}` : match[3];
-    return `${year}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
+    if (match) {
+      const year = match[3].length === 2 ? `20${match[3]}` : match[3];
+      return `${year}-${match[2].padStart(2, "0")}-${match[1].padStart(2, "0")}`;
+    }
+    const parsed = new Date(raw);
+    if (!Number.isNaN(parsed.getTime())) {
+      return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, "0")}-${String(parsed.getDate()).padStart(2, "0")}`;
+    }
+    return raw;
   }
 
   function rowId(row) {
@@ -128,7 +134,7 @@
       : `<p class="empty">Google Sheet 还没有记录。</p>`;
   }
 
-  async function loadSheetRecords() {
+  async function loadSheetRecords(forceFresh = false) {
     if (!APPS_SCRIPT_URL) {
       $("#status").textContent = "尚未连接 Google Sheet，请先完成 Apps Script 部署。";
       $("#status").className = "status error";
@@ -138,7 +144,8 @@
     }
     try {
       $("#status").textContent = "正在读取 Google Sheet...";
-      const response = await fetch(`${APPS_SCRIPT_URL}?t=${Date.now()}`, { cache: "no-store" });
+      const url = forceFresh ? `${APPS_SCRIPT_URL}?t=${Date.now()}` : APPS_SCRIPT_URL;
+      const response = await fetch(url, { cache: forceFresh ? "no-store" : "default" });
       const result = await response.json();
       if (!response.ok || !Array.isArray(result.records)) throw new Error("Sheet not available");
       state.sheetRecords = result.records.map((row) => ({
@@ -233,7 +240,7 @@
     const button = $("#refreshButton");
     button.disabled = true;
     button.textContent = "↻ 更新中...";
-    await loadSheetRecords();
+    await loadSheetRecords(true);
     button.disabled = false;
     button.textContent = "↻ 刷新资料";
   });
