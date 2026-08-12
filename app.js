@@ -1,15 +1,26 @@
 (() => {
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTYucEDOqWB3tSc9Ax4RrNDQlLSxfg8ZSwS8ciH_a36aALs_tFql2c21QOJQKi7yA/exec";
+  const CACHE_KEY = "personal-expenses-sheet-cache-v1";
+  const QUEUE_KEY = "personal-expenses-write-queue-v1";
   const DEFAULT_TOPICS = ["Food drinks", "Entertainment", "Fuel", "Parking", "Ultility"];
   const $ = (selector) => document.querySelector(selector);
   const today = new Date();
-  const state = { records: [], topics: DEFAULT_TOPICS };
+  const state = { records: [], topics: DEFAULT_TOPICS, queue: [], syncing: false };
   const datePicker = $("#datePicker");
 
   const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   const displayDate = (date) => `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
   const money = (value) => Number(value || 0).toFixed(2);
   const escapeHtml = (value) => String(value ?? "").replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[char]));
+
+  function readLocal(key, fallback) {
+    try { return JSON.parse(localStorage.getItem(key)) ?? fallback; } catch { return fallback; }
+  }
+
+  function saveLocal() {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ records: state.records, topics: state.topics }));
+    localStorage.setItem(QUEUE_KEY, JSON.stringify(state.queue));
+  }
 
   function normalizeDate(value) {
     const raw = String(value || "").trim();
@@ -45,7 +56,7 @@
     $("#recordCount").textContent = `${monthRecords.length} 笔`;
 
     $("#records").innerHTML = monthRecords.length
-      ? monthRecords.map((record) => `<div class="record"><span class="record-date">${record.date.slice(8, 10)}-${record.date.slice(5, 7)}</span><span class="record-topic">${escapeHtml(record.topic)}</span><span class="record-others">${escapeHtml(record.others || "—")}</span><span class="amount">${money(record.cost)}</span><button class="delete-record" data-row="${record.row}" type="button">删除</button></div>`).join("")
+      ? monthRecords.map((record) => `<div class="record"><span class="record-date">${record.date.slice(8, 10)}-${record.date.slice(5, 7)}</span><span class="record-topic">${escapeHtml(record.topic)}</span><span class="record-others">${escapeHtml(record.others || "—")}</span><span class="amount">${money(record.cost)}</span>${record.pending ? "<span class=\"syncing-record\">同步中</span>" : `<button class="delete-record" data-row="${record.row}" type="button">删除</button>`}</div>`).join("")
       : "<p class=\"empty\">这个月还没有花费记录。</p>";
 
     const monthMap = {};
@@ -105,18 +116,20 @@
     try {
       const result = await getSheetData();
       if (!result?.ok || !Array.isArray(result.records)) throw new Error("资料格式错误");
+      const pendingRecords = state.records.filter((record) => record.pending);
       state.records = result.records.map((record) => ({
         row: Number(record.row),
         date: normalizeDate(record.date),
         topic: String(record.topic || "").trim(),
         others: String(record.others || "").trim(),
         cost: Number(record.cost) || 0,
-      })).filter((record) => record.row && record.date && record.topic);
+      })).filter((record) => record.row && record.date && record.topic).concat(pendingRecords);
       state.topics = Array.isArray(result.topics) && result.topics.length
         ? [...new Set(result.topics.map((topic) => String(topic).trim()).filter(Boolean))]
         : DEFAULT_TOPICS;
       renderTopics();
       render();
+      saveLocal();
       setStatus("已读取 Google Sheet。", "success");
     } catch (error) {
       renderTopics();
@@ -129,6 +142,28 @@
     const response = await fetch(APPS_SCRIPT_URL, { method: "POST", body: JSON.stringify(payload) });
     const result = await response.json();
     if (!response.ok || !result.ok) throw new Error("保存失败");
+    return result;
+  }
+
+  async function processQueue() {
+    if (state.syncing || !state.queue.length) return;
+    state.syncing = true;
+    while (state.queue.length) {
+      const job = state.queue[0];
+      try {
+        const result = await postSheetData(job.payload);
+        const record = state.records.find((item) => item.clientId === job.clientId);
+        if (record) { record.pending = false; record.row = Number(result.row) || record.row; }
+        state.queue.shift();
+        saveLocal();
+        render();
+      } catch {
+        setStatus("已保存在电话，等待网络同步。", "error");
+        break;
+      }
+    }
+    state.syncing = false;
+    if (!state.queue.length) setStatus("已同步到 Google Sheet。", "success");
   }
 
   $("#expenseForm").addEventListener("submit", async (event) => {
@@ -137,17 +172,16 @@
     const topic = $("#topic").value;
     const cost = Number($("#cost").value);
     if (!date || !topic || !Number.isFinite(cost) || cost <= 0) return setStatus("请填写日期、课题和金额。", "error");
-    try {
-      setStatus("正在保存到 Google Sheet...");
-      await postSheetData({ date, topic, others: $("#others").value.trim(), cost });
-      $("#expenseForm").reset();
-      $("#date").value = displayDate(new Date());
-      datePicker.value = isoDate(new Date());
-      await loadSheetData();
-      setStatus("已保存到 Google Sheet。", "success");
-    } catch {
-      setStatus("保存失败，请稍后再试。", "error");
-    }
+    const clientId = `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    state.records.unshift({ clientId, row: 0, date, topic, others: $("#others").value.trim(), cost, pending: true });
+    state.queue.push({ clientId, payload: { date, topic, others: $("#others").value.trim(), cost } });
+    saveLocal();
+    render();
+    $("#expenseForm").reset();
+    $("#date").value = displayDate(new Date());
+    datePicker.value = isoDate(new Date());
+    setStatus("已记录在电话，正在同步...", "success");
+    processQueue();
   });
 
   $("#records").addEventListener("click", async (event) => {
@@ -180,6 +214,7 @@
     button.disabled = true;
     button.textContent = "↻ 更新中...";
     await loadSheetData();
+    processQueue();
     button.disabled = false;
     button.textContent = "↻ 刷新资料";
   });
@@ -198,7 +233,13 @@
 
   $("#date").value = displayDate(today);
   datePicker.value = isoDate(today);
+  const cached = readLocal(CACHE_KEY, {});
+  state.records = Array.isArray(cached.records) ? cached.records : [];
+  state.topics = Array.isArray(cached.topics) && cached.topics.length ? cached.topics : DEFAULT_TOPICS;
+  state.queue = readLocal(QUEUE_KEY, []);
   renderTopics();
   render();
   loadSheetData();
+  processQueue();
+  window.addEventListener("online", processQueue);
 })();

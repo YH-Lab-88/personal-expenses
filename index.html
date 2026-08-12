@@ -33,6 +33,7 @@
       .refresh-button{padding:7px 10px;border:1px solid #c9dcf2;border-radius:9px;color:#2868ae;background:#fff;font-size:.74rem;font-weight:800;cursor:pointer}.refresh-button:disabled{opacity:.55;cursor:wait}
       .record-actions{display:flex;align-items:flex-end;flex-direction:column;gap:7px}.delete-record{padding:4px 8px;border:0;border-radius:8px;color:#bd4d4d;background:#fdecec;font-size:.72rem;font-weight:850;cursor:pointer}
       .record{display:grid;grid-template-columns:48px minmax(72px,1fr) minmax(58px,1fr) 72px 44px;align-items:center;gap:7px;padding:11px 0;font-size:.74rem}.record-date,.record-topic,.record-others,.record .amount{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.record-date,.record-others{color:var(--muted)}.record-topic{font-weight:750;color:var(--ink)}.record .amount{font-size:.74rem;font-weight:850}.record .delete-record{padding:5px 6px;font-size:.68rem}
+      .syncing-record{color:#6c7f96;font-size:.64rem;text-align:right}
       @media(max-width:390px){.record{grid-template-columns:43px minmax(62px,1fr) minmax(48px,1fr) 66px 40px;gap:5px}.record .amount{font-size:.7rem}.record .delete-record{padding:5px 4px;font-size:.64rem}}
     </style>
   </head>
@@ -65,6 +66,6 @@
       </div>
       <section id="analysisView" class="card analysis-view" hidden><div class="section-head"><h2>每月分析</h2><span class="muted">按 Topic 分类</span></div><div id="monthlyChart" class="chart"></div></section>
     </main>
-    <script src="./app.js?v=20260812-2"></script>
+    <script src="./app.js?v=20260812-3"></script>
   </body>
 </html>

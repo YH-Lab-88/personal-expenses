@@ -47,6 +47,9 @@ function doGet(e) {
 }
 
 function doPost(e) {
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
   const data = JSON.parse(e.postData.contents || '{}');
   const sheet = getExpensesSheet();
   if (!sheet) throw new Error('Expenses sheet not found');
@@ -65,4 +68,7 @@ function doPost(e) {
   sheet.getRange(newRow, 1).setNumberFormat('dd/MM/yyyy');
   SpreadsheetApp.flush();
   return ContentService.createTextOutput(JSON.stringify({ ok: true, row: newRow })).setMimeType(ContentService.MimeType.JSON);
+  } finally {
+    lock.releaseLock();
+  }
 }
