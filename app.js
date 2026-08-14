@@ -7,6 +7,7 @@
   const today = new Date();
   const state = { records: [], topics: DEFAULT_TOPICS, queue: [], syncing: false };
   const datePicker = $("#datePicker");
+  let calculatorExpression = "";
 
   const isoDate = (date) => `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
   const displayDate = (date) => `${String(date.getDate()).padStart(2, "0")}/${String(date.getMonth() + 1).padStart(2, "0")}/${date.getFullYear()}`;
@@ -52,14 +53,14 @@
   }
 
   function renderCalculator() {
-    const expression = $("#cost").value;
-    const amount = calculateAmount(expression);
-    $("#calculatorExpression").textContent = expression || "0";
+    const amount = calculateAmount(calculatorExpression);
+    $("#calculatorExpression").textContent = calculatorExpression || "0";
     $("#calculatorResult").textContent = amount == null ? "—" : money(amount);
     renderCalculatedTotal();
   }
 
   function openCalculator() {
+    calculatorExpression = $("#cost").value;
     $("#calculatorModal").hidden = false;
     renderCalculator();
   }
@@ -243,7 +244,8 @@
     render();
   });
   $("#date").addEventListener("change", render);
-  $("#cost").addEventListener("click", openCalculator);
+  $("#cost").addEventListener("input", renderCalculatedTotal);
+  $("#calculatorOpen").addEventListener("click", openCalculator);
   $("#calculatorClose").addEventListener("click", closeCalculator);
   $("#calculatorModal").addEventListener("click", (event) => {
     if (event.target === $("#calculatorModal")) closeCalculator();
@@ -251,13 +253,16 @@
   $("#calculatorKeys").addEventListener("click", (event) => {
     const button = event.target.closest("button");
     if (!button) return;
-    if (button.dataset.action === "clear") $("#cost").value = "";
-    else if (button.dataset.action === "delete") $("#cost").value = $("#cost").value.slice(0, -1);
-    else if (button.dataset.key) $("#cost").value += button.dataset.key;
+    if (button.dataset.action === "clear") calculatorExpression = "";
+    else if (button.dataset.action === "delete") calculatorExpression = calculatorExpression.slice(0, -1);
+    else if (button.dataset.key) calculatorExpression += button.dataset.key;
     renderCalculator();
   });
   $("#calculatorConfirm").addEventListener("click", () => {
-    if (calculateAmount($("#cost").value) == null) return setStatus("请完成正确的金额计算。", "error");
+    const amount = calculateAmount(calculatorExpression);
+    if (amount == null) return setStatus("请完成正确的金额计算。", "error");
+    $("#cost").value = amount.toFixed(2);
+    renderCalculatedTotal();
     closeCalculator();
   });
   $("#refreshButton").addEventListener("click", async () => {

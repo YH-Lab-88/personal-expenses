@@ -35,6 +35,7 @@
       .record{display:grid;grid-template-columns:48px minmax(72px,1fr) minmax(58px,1fr) 72px 44px;align-items:center;gap:7px;padding:11px 0;font-size:.74rem}.record-date,.record-topic,.record-others,.record .amount{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.record-date,.record-others{color:var(--muted)}.record-topic{font-weight:750;color:var(--ink)}.record .amount{font-size:.74rem;font-weight:850}.record .delete-record{padding:5px 6px;font-size:.68rem}
       .syncing-record{color:#6c7f96;font-size:.64rem;text-align:right}
       .calculated-total{grid-column:2;margin:-5px 0 1px;color:#2868ae;font-size:.75rem;font-weight:800;text-align:right}
+      .amount-control{grid-column:2;display:flex;gap:8px}.amount-control #cost{min-width:0;flex:1}.calculator-open{flex:0 0 auto;border:1px solid #c9dcf2;border-radius:10px;background:#eaf3fd;color:#2868ae;padding:0 12px;font-size:.8rem;font-weight:850;cursor:pointer}
       .calculator-modal{position:fixed;inset:0;z-index:20;display:grid;align-items:end;background:rgba(12,34,61,.38);padding:14px}.calculator-modal[hidden]{display:none}.calculator{width:min(100%,430px);margin:auto;border-radius:22px;background:#fff;box-shadow:0 20px 60px rgba(10,37,69,.3);overflow:hidden}.calculator-top{display:flex;align-items:center;justify-content:space-between;padding:15px 17px 9px;color:var(--ink);font-weight:850}.calculator-close{border:0;background:var(--soft);color:#2868ae;border-radius:9px;padding:6px 10px;font-weight:800;cursor:pointer}.calculator-display{margin:0 15px 14px;padding:16px;border:1px solid var(--line);border-radius:13px;background:#f8fbff;text-align:right;min-height:76px}.calculator-expression{display:block;min-height:20px;color:var(--muted);font-size:.9rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.calculator-result{display:block;margin-top:6px;color:var(--ink);font-size:1.55rem;font-weight:850;font-variant-numeric:tabular-nums}.calculator-keys{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:0 15px 15px}.calculator-key{height:48px;border:0;border-radius:11px;background:#eef4fb;color:var(--ink);font-size:1.15rem;font-weight:800;cursor:pointer}.calculator-key.operator{background:#dcecff;color:#2166b1}.calculator-key.clear{color:#bd4d4d;background:#fdecec}.calculator-key.confirm{grid-column:span 4;color:#fff;background:#1f579a;font-size:1rem}
       @media(max-width:390px){.record{grid-template-columns:43px minmax(62px,1fr) minmax(48px,1fr) 66px 40px;gap:5px}.record .amount{font-size:.7rem}.record .delete-record{padding:5px 4px;font-size:.64rem}}
     </style>
@@ -58,7 +59,7 @@
           <div class="field-row"><label for="date">日期</label><div class="date-control"><input id="date" type="text" inputmode="numeric" placeholder="11/08/2026" maxlength="10" required /><button id="calendarButton" class="calendar-button" type="button" aria-label="选择日期">▣</button></div><input id="datePicker" type="date" tabindex="-1" aria-hidden="true" /></div>
           <div class="field-row"><label for="topic">课题</label><select id="topic" required></select></div>
           <div class="field-row"><label for="others">额外</label><input id="others" type="text" placeholder="details" /></div>
-          <div class="field-row"><label for="cost">金额</label><input id="cost" type="text" readonly placeholder="点击输入金额" required aria-haspopup="dialog" /><span id="calculatedTotal" class="calculated-total">合计 0.00</span></div>
+          <div class="field-row"><label for="cost">金额</label><div class="amount-control"><input id="cost" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required /><button id="calculatorOpen" class="calculator-open" type="button">计算</button></div><span id="calculatedTotal" class="calculated-total">合计 0.00</span></div>
           <button class="primary" type="submit">记录</button>
           <p id="status" class="status" role="status"></p>
         </form>
@@ -81,6 +82,6 @@
         </div>
       </div>
     </div>
-    <script src="./app.js?v=20260814-2"></script>
+    <script src="./app.js?v=20260814-3"></script>
   </body>
 </html>
