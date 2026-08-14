@@ -35,6 +35,22 @@
     return Number.isNaN(parsed.getTime()) ? "" : isoDate(parsed);
   }
 
+  function calculateAmount(value) {
+    const expression = String(value || "").trim();
+    if (!expression || !/^[\d.\s()+\-*/]+$/.test(expression)) return null;
+    try {
+      const result = Function(`"use strict"; return (${expression})`)();
+      return Number.isFinite(result) && result > 0 ? Math.round(result * 100) / 100 : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function renderCalculatedTotal() {
+    const amount = calculateAmount($("#cost").value);
+    $("#calculatedTotal").textContent = amount == null ? "合计 —" : `合计 ${money(amount)}`;
+  }
+
   function selectedMonth() {
     return normalizeDate($("#date").value).slice(0, 7) || isoDate(today).slice(0, 7);
   }
@@ -170,8 +186,8 @@
     event.preventDefault();
     const date = normalizeDate($("#date").value);
     const topic = $("#topic").value;
-    const cost = Number($("#cost").value);
-    if (!date || !topic || !Number.isFinite(cost) || cost <= 0) return setStatus("请填写日期、课题和金额。", "error");
+    const cost = calculateAmount($("#cost").value);
+    if (!date || !topic || cost == null) return setStatus("金额可输入 12.50+8.90 这类计算式。", "error");
     const clientId = `local-${Date.now()}-${Math.random().toString(16).slice(2)}`;
     state.records.unshift({ clientId, row: 0, date, topic, others: $("#others").value.trim(), cost, pending: true });
     state.queue.push({ clientId, payload: { date, topic, others: $("#others").value.trim(), cost } });
@@ -180,6 +196,7 @@
     $("#expenseForm").reset();
     $("#date").value = displayDate(new Date());
     datePicker.value = isoDate(new Date());
+    renderCalculatedTotal();
     setStatus("已记录在电话，正在同步...", "success");
     processQueue();
   });
@@ -209,6 +226,7 @@
     render();
   });
   $("#date").addEventListener("change", render);
+  $("#cost").addEventListener("input", renderCalculatedTotal);
   $("#refreshButton").addEventListener("click", async () => {
     const button = $("#refreshButton");
     button.disabled = true;
@@ -238,6 +256,7 @@
   state.topics = Array.isArray(cached.topics) && cached.topics.length ? cached.topics : DEFAULT_TOPICS;
   state.queue = readLocal(QUEUE_KEY, []);
   renderTopics();
+  renderCalculatedTotal();
   render();
   loadSheetData();
   processQueue();
