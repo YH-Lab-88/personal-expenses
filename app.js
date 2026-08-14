@@ -51,6 +51,23 @@
     $("#calculatedTotal").textContent = amount == null ? "合计 —" : `合计 ${money(amount)}`;
   }
 
+  function renderCalculator() {
+    const expression = $("#cost").value;
+    const amount = calculateAmount(expression);
+    $("#calculatorExpression").textContent = expression || "0";
+    $("#calculatorResult").textContent = amount == null ? "—" : money(amount);
+    renderCalculatedTotal();
+  }
+
+  function openCalculator() {
+    $("#calculatorModal").hidden = false;
+    renderCalculator();
+  }
+
+  function closeCalculator() {
+    $("#calculatorModal").hidden = true;
+  }
+
   function selectedMonth() {
     return normalizeDate($("#date").value).slice(0, 7) || isoDate(today).slice(0, 7);
   }
@@ -226,7 +243,23 @@
     render();
   });
   $("#date").addEventListener("change", render);
-  $("#cost").addEventListener("input", renderCalculatedTotal);
+  $("#cost").addEventListener("click", openCalculator);
+  $("#calculatorClose").addEventListener("click", closeCalculator);
+  $("#calculatorModal").addEventListener("click", (event) => {
+    if (event.target === $("#calculatorModal")) closeCalculator();
+  });
+  $("#calculatorKeys").addEventListener("click", (event) => {
+    const button = event.target.closest("button");
+    if (!button) return;
+    if (button.dataset.action === "clear") $("#cost").value = "";
+    else if (button.dataset.action === "delete") $("#cost").value = $("#cost").value.slice(0, -1);
+    else if (button.dataset.key) $("#cost").value += button.dataset.key;
+    renderCalculator();
+  });
+  $("#calculatorConfirm").addEventListener("click", () => {
+    if (calculateAmount($("#cost").value) == null) return setStatus("请完成正确的金额计算。", "error");
+    closeCalculator();
+  });
   $("#refreshButton").addEventListener("click", async () => {
     const button = $("#refreshButton");
     button.disabled = true;
