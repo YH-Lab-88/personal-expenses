@@ -105,7 +105,10 @@
       ? months.map((monthKey) => {
         const categories = monthMap[monthKey];
         const monthTotal = Object.values(categories).reduce((sum, value) => sum + value, 0);
-        const rows = state.topics.map((topic) => {
+        const rows = [...state.topics].sort((a, b) => {
+          const difference = (categories[a] || 0) - (categories[b] || 0);
+          return difference || a.localeCompare(b, "zh-Hans");
+        }).map((topic) => {
           const value = categories[topic] || 0;
           return `<div class="bar-row"><span>${escapeHtml(topic)}</span><div class="bar-track"><div class="bar-fill" style="width:${monthTotal ? (value / monthTotal) * 100 : 0}%"></div></div><span class="bar-value">${money(value)}</span></div>`;
         }).join("");
