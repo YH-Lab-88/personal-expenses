@@ -82,6 +82,33 @@
     $("#topic").innerHTML = state.topics.map((topic) => `<option value="${escapeHtml(topic)}">${escapeHtml(topic)}</option>`).join("");
   }
 
+  function renderFuelParkingSummary(records) {
+    const groups = [
+      ["Vios", "vios"],
+      ["Kawasaki", "kawasaki"],
+      ["Yamaha", "yamaha"],
+      ["Grab", "grab"],
+      ["Parking", null],
+    ];
+    const totals = Object.fromEntries(groups.map(([label]) => [label, 0]));
+    records.forEach((record) => {
+      const detail = String(record.others || "").toLowerCase();
+      const match = groups.find(([, keyword]) => keyword && detail.includes(keyword));
+      totals[match ? match[0] : "Parking"] += record.cost;
+    });
+    return `<div class="fuel-summary">${groups.map(([label]) => `<div class="fuel-summary-row"><span>${label}</span><span>${money(totals[label])}</span></div>`).join("")}</div>`;
+  }
+
+  function renderFoodDrinksSummary(records) {
+    const mealPattern = /早餐|午餐|晚餐/;
+    const totals = { "正餐": 0, "其他": 0 };
+    records.forEach((record) => {
+      const detail = String(record.others || "");
+      totals[mealPattern.test(detail) ? "正餐" : "其他"] += record.cost;
+    });
+    return `<div class="fuel-summary">${Object.keys(totals).map((label) => `<div class="fuel-summary-row"><span>${label}</span><span>${money(totals[label])}</span></div>`).join("")}</div>`;
+  }
+
   function render() {
     const month = selectedMonth();
     const monthRecords = state.records.filter((record) => record.date.startsWith(month)).sort((a, b) => b.date.localeCompare(a.date));
@@ -101,20 +128,51 @@
       monthMap[key][record.topic] = (monthMap[key][record.topic] || 0) + record.cost;
     });
     const months = Object.keys(monthMap).sort((a, b) => b.localeCompare(a)).slice(0, 12);
-    $("#monthlyChart").innerHTML = months.length
-      ? months.map((monthKey) => {
+    const activeMonth = $("#analysisMonth").value || isoDate(today).slice(0, 7);
+    const visibleMonths = months.includes(activeMonth) ? [activeMonth] : [];
+    $("#monthlyChart").innerHTML = visibleMonths.length
+      ? visibleMonths.map((monthKey) => {
         const categories = monthMap[monthKey];
         const monthTotal = Object.values(categories).reduce((sum, value) => sum + value, 0);
-        const rows = [...state.topics].sort((a, b) => {
+        const sortedTopics = [...state.topics].sort((a, b) => {
           const difference = (categories[a] || 0) - (categories[b] || 0);
           return difference || a.localeCompare(b, "zh-Hans");
-        }).map((topic) => {
+        });
+        const summaryRows = sortedTopics.map((topic) => {
           const value = categories[topic] || 0;
           return `<div class="bar-row"><span>${escapeHtml(topic)}</span><div class="bar-track"><div class="bar-fill" style="width:${monthTotal ? (value / monthTotal) * 100 : 0}%"></div></div><span class="bar-value">${money(value)}</span></div>`;
         }).join("");
-        return `<div class="month-analysis"><div class="month-analysis-head"><strong>${monthKey}</strong><span>${money(monthTotal)}</span></div>${rows}</div>`;
+        const detailRows = sortedTopics.map((topic, topicIndex) => {
+          const value = categories[topic] || 0;
+          const topicRecords = state.records.filter((record) => record.date.startsWith(monthKey) && record.topic === topic)
+            .sort((a, b) => b.date.localeCompare(a.date));
+          const details = topicRecords
+            .map((record) => `<div class="category-detail"><span>${record.date.slice(8, 10)}/${record.date.slice(5, 7)}</span><span>${escapeHtml(record.others || "—")}</span><span class="detail-cost">${money(record.cost)}</span></div>`).join("") || "<span class=\"category-empty\">暂无记录</span>";
+          const fuelSummary = topic.toLowerCase() === "fuel parking" ? renderFuelParkingSummary(topicRecords) : "";
+          const foodSummary = topic.toLowerCase() === "food drinks" ? renderFoodDrinksSummary(topicRecords) : "";
+          const detailId = `details-${monthKey}-${topicIndex}`;
+          const detailLabel = topicRecords.length ? `显示明细（${topicRecords.length} 笔）` : "显示明细";
+          return `<div class="category-breakdown"><div class="category-breakdown-head"><span>${escapeHtml(topic)}</span><span>${money(value)}</span></div>${fuelSummary}${foodSummary}<button class="detail-toggle" data-detail-target="${detailId}" type="button" aria-expanded="false">${detailLabel}</button><div id="${detailId}" class="category-record-list" hidden>${details}</div></div>`;
+        }).join("");
+        return `<div class="month-analysis"><div class="month-analysis-head"><strong>${monthKey}</strong><span>${money(monthTotal)}</span></div><div class="analysis-subhead">CATEGORY 总结</div>${summaryRows}<div class="analysis-detail-heading">花费明细</div>${detailRows}</div>`;
       }).join("")
-      : "<p class=\"empty\">Google Sheet 还没有可分析的记录。</p>";
+      : "<p class=\"empty\">这个月还没有可分析的记录。</p>";
+
+    const comparisonMonths = [...months].reverse();
+    $("#monthlyComparison").innerHTML = comparisonMonths.length
+      ? `<table class="comparison-table"><thead><tr><th>月份</th><th>总花费</th>${state.topics.map((topic) => `<th>${escapeHtml(topic)}</th>`).join("")}</tr></thead><tbody>${comparisonMonths.map((monthKey, index) => {
+        const previousMonth = comparisonMonths[index - 1];
+        const total = Object.values(monthMap[monthKey]).reduce((sum, value) => sum + value, 0);
+        const previousTotal = previousMonth ? Object.values(monthMap[previousMonth]).reduce((sum, value) => sum + value, 0) : null;
+        const totalTrend = previousTotal == null || total === previousTotal ? "" : total > previousTotal ? '<span class="comparison-trend up">⬆</span>' : '<span class="comparison-trend down">⬇</span>';
+        return `<tr><td>${monthKey}</td><td><span class="comparison-cell"><span class="comparison-value">${money(total)}</span>${totalTrend || "<span></span>"}</span></td>${state.topics.map((topic) => {
+          const value = monthMap[monthKey][topic] || 0;
+          const previousValue = previousMonth ? monthMap[previousMonth][topic] || 0 : null;
+          const trend = previousValue == null || value === previousValue ? "" : value > previousValue ? '<span class="comparison-trend up">⬆</span>' : '<span class="comparison-trend down">⬇</span>';
+          return `<td><span class="comparison-cell"><span class="comparison-value">${money(value)}</span>${trend || "<span></span>"}</span></td>`;
+        }).join("")}</tr>`;
+      }).join("")}</tbody></table>`
+      : "<p class=\"empty\">Google Sheet 还没有可比较的记录。</p>";
   }
 
   async function getSheetData() {
@@ -247,6 +305,18 @@
     render();
   });
   $("#date").addEventListener("change", render);
+  $("#analysisMonth").addEventListener("change", render);
+  $("#monthlyChart").addEventListener("click", (event) => {
+    const button = event.target.closest(".detail-toggle");
+    if (!button) return;
+    const list = document.getElementById(button.dataset.detailTarget);
+    if (!list) return;
+    const expanded = list.hidden;
+    list.hidden = !expanded;
+    button.setAttribute("aria-expanded", String(expanded));
+    const count = list.querySelectorAll(".category-detail").length;
+    button.textContent = expanded ? "收起明细" : count ? `显示明细（${count} 笔）` : "显示明细";
+  });
   $("#cost").addEventListener("input", renderCalculatedTotal);
   $("#calculatorOpen").addEventListener("click", openCalculator);
   $("#calculatorClose").addEventListener("click", closeCalculator);
@@ -280,18 +350,31 @@
   $("#analysisButton").addEventListener("click", () => {
     $("#recordView").hidden = true;
     $("#analysisView").hidden = false;
+    $("#monthlyComparisonView").hidden = true;
     $("#recordButton").classList.remove("active");
     $("#analysisButton").classList.add("active");
+    $("#monthlyButton").classList.remove("active");
+  });
+  $("#monthlyButton").addEventListener("click", () => {
+    $("#recordView").hidden = true;
+    $("#analysisView").hidden = true;
+    $("#monthlyComparisonView").hidden = false;
+    $("#recordButton").classList.remove("active");
+    $("#analysisButton").classList.remove("active");
+    $("#monthlyButton").classList.add("active");
   });
   $("#recordButton").addEventListener("click", () => {
     $("#recordView").hidden = false;
     $("#analysisView").hidden = true;
+    $("#monthlyComparisonView").hidden = true;
     $("#recordButton").classList.add("active");
     $("#analysisButton").classList.remove("active");
+    $("#monthlyButton").classList.remove("active");
   });
 
   $("#date").value = displayDate(today);
   datePicker.value = isoDate(today);
+  $("#analysisMonth").value = isoDate(today).slice(0, 7);
   const cached = readLocal(CACHE_KEY, {});
   state.records = Array.isArray(cached.records) ? cached.records : [];
   state.topics = Array.isArray(cached.topics) && cached.topics.length ? cached.topics : DEFAULT_TOPICS;
