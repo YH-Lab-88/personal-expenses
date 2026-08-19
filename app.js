@@ -328,6 +328,7 @@
     if (!button) return;
     if (button.dataset.action === "clear") calculatorExpression = "";
     else if (button.dataset.action === "delete") calculatorExpression = calculatorExpression.slice(0, -1);
+    else if (button.dataset.action === "percent") calculatorExpression = calculatorExpression.replace(/(\d*\.?\d+)$/, "($1/100)");
     else if (button.dataset.key) calculatorExpression += button.dataset.key;
     renderCalculator();
   });
