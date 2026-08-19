@@ -164,11 +164,11 @@
         const previousMonth = comparisonMonths[index - 1];
         const total = Object.values(monthMap[monthKey]).reduce((sum, value) => sum + value, 0);
         const previousTotal = previousMonth ? Object.values(monthMap[previousMonth]).reduce((sum, value) => sum + value, 0) : null;
-        const totalTrend = previousTotal == null || total === previousTotal ? "" : total > previousTotal ? '<span class="comparison-trend up">⬆</span>' : '<span class="comparison-trend down">⬇</span>';
+        const totalTrend = previousTotal == null || total === previousTotal ? "" : total > previousTotal ? '<span class="comparison-trend up">↑</span>' : '<span class="comparison-trend down">↓</span>';
         return `<tr><td>${monthKey}</td><td><span class="comparison-cell"><span class="comparison-value">${money(total)}</span>${totalTrend || "<span></span>"}</span></td>${state.topics.map((topic) => {
           const value = monthMap[monthKey][topic] || 0;
           const previousValue = previousMonth ? monthMap[previousMonth][topic] || 0 : null;
-          const trend = previousValue == null || value === previousValue ? "" : value > previousValue ? '<span class="comparison-trend up">⬆</span>' : '<span class="comparison-trend down">⬇</span>';
+          const trend = previousValue == null || value === previousValue ? "" : value > previousValue ? '<span class="comparison-trend up">↑</span>' : '<span class="comparison-trend down">↓</span>';
           return `<td><span class="comparison-cell"><span class="comparison-value">${money(value)}</span>${trend || "<span></span>"}</span></td>`;
         }).join("")}</tr>`;
       }).join("")}</tbody></table>`
