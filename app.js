@@ -1,6 +1,6 @@
 (() => {
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTYucEDOqWB3tSc9Ax4RrNDQlLSxfg8ZSwS8ciH_a36aALs_tFql2c21QOJQKi7yA/exec";
-  const APP_VERSION = "2026.08.20.1";
+  const APP_VERSION = "2026.08.20.2";
   const CACHE_KEY = "personal-expenses-sheet-cache-v1";
   const QUEUE_KEY = "personal-expenses-write-queue-v1";
   const DEFAULT_TOPICS = ["Food drinks", "Entertainment", "Fuel", "Parking", "Ultility"];
@@ -39,9 +39,9 @@
 
   function calculateAmount(value) {
     const expression = String(value || "").trim();
-    if (!expression || !/^[\d.\s()+\-*/]+$/.test(expression)) return null;
+    if (!expression || !/^[\d.\s%()+\-*/]+$/.test(expression)) return null;
     try {
-      const result = Function(`"use strict"; return (${expression})`)();
+      const result = Function(`"use strict"; return (${expression.replace(/%/g, "/100")})`)();
       return Number.isFinite(result) && result > 0 ? Math.round(result * 100) / 100 : null;
     } catch {
       return null;
@@ -344,7 +344,7 @@
   });
   $("#cost").addEventListener("input", renderCalculatedTotal);
   $("#calculatorOpen").addEventListener("click", openCalculator);
-  $("#calculatorClose").addEventListener("click", closeCalculator);
+  $("#calculatorCancel").addEventListener("click", closeCalculator);
   $("#calculatorModal").addEventListener("click", (event) => {
     if (event.target === $("#calculatorModal")) closeCalculator();
   });
@@ -353,11 +353,10 @@
     if (!button) return;
     if (button.dataset.action === "clear") calculatorExpression = "";
     else if (button.dataset.action === "delete") calculatorExpression = calculatorExpression.slice(0, -1);
-    else if (button.dataset.action === "percent") calculatorExpression = calculatorExpression.replace(/(\d*\.?\d+)$/, "($1/100)");
     else if (button.dataset.key) calculatorExpression += button.dataset.key;
     renderCalculator();
   });
-  $("#calculatorConfirm").addEventListener("click", () => {
+  $("#calculatorEquals").addEventListener("click", () => {
     const amount = calculateAmount(calculatorExpression);
     if (amount == null) return setStatus("请完成正确的金额计算。", "error");
     $("#cost").value = amount.toFixed(2);
