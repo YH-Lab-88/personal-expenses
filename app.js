@@ -1,5 +1,6 @@
 (() => {
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTYucEDOqWB3tSc9Ax4RrNDQlLSxfg8ZSwS8ciH_a36aALs_tFql2c21QOJQKi7yA/exec";
+  const APP_VERSION = "2026.08.20.1";
   const CACHE_KEY = "personal-expenses-sheet-cache-v1";
   const QUEUE_KEY = "personal-expenses-write-queue-v1";
   const DEFAULT_TOPICS = ["Food drinks", "Entertainment", "Fuel", "Parking", "Ultility"];
@@ -76,6 +77,30 @@
   function setStatus(message, type = "") {
     $("#status").textContent = message;
     $("#status").className = `status ${type}`;
+  }
+
+  function checkForAppUpdate() {
+    if (!/^https?:$/.test(window.location.protocol)) return;
+
+    if ("serviceWorker" in navigator) {
+      const appPath = new URL("./", window.location.href).pathname;
+      navigator.serviceWorker.getRegistrations()
+        .then((registrations) => Promise.all(registrations
+          .filter((registration) => new URL(registration.scope).pathname === appPath)
+          .map((registration) => registration.unregister())))
+        .catch(() => {});
+    }
+
+    fetch("./version.json", { cache: "no-store" })
+      .then((response) => response.ok ? response.json() : null)
+      .then((release) => {
+        if (!release?.version || release.version === APP_VERSION) return;
+        const url = new URL(window.location.href);
+        if (url.searchParams.get("app-update") === release.version) return;
+        url.searchParams.set("app-update", release.version);
+        window.location.replace(url.toString());
+      })
+      .catch(() => {});
   }
 
   function renderTopics() {
@@ -380,6 +405,7 @@
   state.records = Array.isArray(cached.records) ? cached.records : [];
   state.topics = Array.isArray(cached.topics) && cached.topics.length ? cached.topics : DEFAULT_TOPICS;
   state.queue = readLocal(QUEUE_KEY, []);
+  checkForAppUpdate();
   renderTopics();
   renderCalculatedTotal();
   render();
