@@ -6,11 +6,14 @@
     <meta name="theme-color" content="#123c70" />
     <link rel="icon" href="./logo.png" type="image/png" />
     <title>个人花费</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap" rel="stylesheet" />
     <link rel="manifest" href="./manifest.webmanifest?v=20260818-1" />
     <link rel="stylesheet" href="./styles.css" />
     <style>
       :root{--ink:#123c70;--muted:#6c7f96;--line:#d9e5f2;--bg:#f3f7fc;--accent:#2d74c8;--soft:#eaf3fd;--shadow:0 14px 35px rgba(18,60,112,.1)}
-      .hero-card{background:linear-gradient(135deg,#123c70,#2d74c8)}.hero-mark{overflow:hidden}.hero-mark img{width:100%;height:100%;object-fit:cover}
+      .hero-card{background:linear-gradient(135deg,#123c70,#2d74c8)}.hero-mark{overflow:hidden}.hero-mark img{width:100%;height:100%;object-fit:cover}.topbar h1{font-family:"Ma Shan Zheng","STKaiti","KaiTi",cursive;font-size:2.7rem;font-weight:400;letter-spacing:.02em}
       .month-chip{border-color:#c9dcf2;background:#f8fbff}
       .local-badge{color:#2868ae;text-decoration:none}
       input,select{background:#fbfdff}
@@ -50,7 +53,7 @@
   <body>
     <main class="app-shell">
       <header class="topbar">
-        <div><p class="eyebrow">PERSONAL SPENDING</p><h1>个人花费</h1><p class="muted">只记录你自己的日常开销</p></div>
+        <div><p class="eyebrow">PERSONAL SPENDING</p><h1>个人花费</h1><p class="muted">只花钱在有价值意义上</p></div>
         <div class="top-actions"><div class="view-switch"><button id="recordButton" class="view-button active" type="button">记录花费</button><button id="analysisButton" class="view-button" type="button">当月分析</button><button id="monthlyButton" class="view-button" type="button">每月分析</button></div><button id="refreshButton" class="refresh-button" type="button">↻ 刷新资料</button></div>
       </header>
 
@@ -90,6 +93,6 @@
         </div>
       </div>
     </div>
-    <script src="./app.js?v=20260820-3"></script>
+    <script src="./app.js?v=20260822-1"></script>
   </body>
 </html>
