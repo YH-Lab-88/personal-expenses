@@ -1,6 +1,6 @@
 (() => {
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxTYucEDOqWB3tSc9Ax4RrNDQlLSxfg8ZSwS8ciH_a36aALs_tFql2c21QOJQKi7yA/exec";
-  const APP_VERSION = "2026.08.20.2";
+  const APP_VERSION = "2026.08.20.3";
   const CACHE_KEY = "personal-expenses-sheet-cache-v1";
   const QUEUE_KEY = "personal-expenses-write-queue-v1";
   const DEFAULT_TOPICS = ["Food drinks", "Entertainment", "Fuel", "Parking", "Ultility"];

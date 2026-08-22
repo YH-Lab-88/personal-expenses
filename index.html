@@ -64,8 +64,8 @@
         <div class="section-head"><h2>新增花费</h2><a class="local-badge" href="https://docs.google.com/spreadsheets/d/1Dcog-g4Epq5qprE3iHC7p_QFOYLKdbMC2Lh2fs3IFEo/edit?gid=0#gid=0" target="_blank" rel="noopener">Google Sheet</a></div>
         <form id="expenseForm">
           <div class="field-row"><label for="date">日期</label><div class="date-control"><input id="date" type="text" inputmode="numeric" placeholder="11/08/2026" maxlength="10" required /><button id="calendarButton" class="calendar-button" type="button" aria-label="选择日期">▣</button></div><input id="datePicker" type="date" tabindex="-1" aria-hidden="true" /></div>
+          <div class="field-row"><label for="others">备注</label><input id="others" type="text" placeholder="details" /></div>
           <div class="field-row"><label for="topic">课题</label><select id="topic" required></select></div>
-          <div class="field-row"><label for="others">额外</label><input id="others" type="text" placeholder="details" /></div>
           <div class="field-row"><label for="cost">金额</label><div class="amount-control"><input id="cost" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="0.00" required /><button id="calculatorOpen" class="calculator-open" type="button">计算</button></div><span id="calculatedTotal" class="calculated-total">合计 0.00</span></div>
           <button class="primary" type="submit">记录</button>
           <p id="status" class="status" role="status"></p>
@@ -82,14 +82,14 @@
         <div id="calculatorTitle" class="calculator-display"><span id="calculatorExpression" class="calculator-expression">0</span><strong id="calculatorResult" class="calculator-result">0.00</strong></div>
         <div id="calculatorKeys" class="calculator-keys">
           <button class="calculator-key" data-key="%" type="button">%</button><button class="calculator-key" data-key="(" type="button">(</button><button class="calculator-key" data-key=")" type="button">)</button><button class="calculator-key backspace" data-action="delete" type="button">⌫</button>
-          <button class="calculator-key" data-key="7" type="button">7</button><button class="calculator-key" data-key="8" type="button">8</button><button class="calculator-key" data-key="9" type="button">9</button><button class="calculator-key operator" data-key="*" type="button">×</button>
-          <button class="calculator-key" data-key="4" type="button">4</button><button class="calculator-key" data-key="5" type="button">5</button><button class="calculator-key" data-key="6" type="button">6</button><button class="calculator-key operator" data-key="-" type="button">−</button>
+          <button class="calculator-key" data-key="7" type="button">7</button><button class="calculator-key" data-key="8" type="button">8</button><button class="calculator-key" data-key="9" type="button">9</button><button class="calculator-key operator" data-key="/" type="button">÷</button>
+          <button class="calculator-key" data-key="4" type="button">4</button><button class="calculator-key" data-key="5" type="button">5</button><button class="calculator-key" data-key="6" type="button">6</button><button class="calculator-key operator" data-key="*" type="button">×</button>
           <button class="calculator-key" data-key="1" type="button">1</button><button class="calculator-key" data-key="2" type="button">2</button><button class="calculator-key" data-key="3" type="button">3</button><button class="calculator-key operator" data-key="-" type="button">−</button>
           <button class="calculator-key clear" data-action="clear" type="button">清除</button><button class="calculator-key" data-key="0" type="button">0</button><button class="calculator-key" data-key="." type="button">.</button><button class="calculator-key operator plus" data-key="+" type="button">＋</button>
           <button id="calculatorCancel" class="calculator-key cancel" type="button">取消</button><button id="calculatorEquals" class="calculator-key confirm" type="button">＝</button>
         </div>
       </div>
     </div>
-    <script src="./app.js?v=20260820-2"></script>
+    <script src="./app.js?v=20260820-3"></script>
   </body>
 </html>
